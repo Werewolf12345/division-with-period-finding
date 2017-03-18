@@ -15,7 +15,9 @@ public class SolutionMainTest {
 		assertEquals(3, SolutionMain.digitCounter(-999));
 		assertEquals(1, SolutionMain.digitCounter(1));
 		assertEquals(2, SolutionMain.digitCounter(-15));
-		assertEquals(7, SolutionMain.digitCounter(1000000));
+		assertEquals(3, SolutionMain.digitCounter(100.0));
+		assertEquals(5, SolutionMain.digitCounter(100.1));
+		assertEquals(14, SolutionMain.digitCounter(100.0000000001));
 	}
 	
 	@Test
@@ -30,37 +32,36 @@ public class SolutionMainTest {
 		assertEquals(1, SolutionMain.getDigitByPosition(123,0));
 		assertEquals(3, SolutionMain.getDigitByPosition(123,2));
 		assertEquals(2, SolutionMain.getDigitByPosition(123,1));
+		assertEquals(-1, SolutionMain.getDigitByPosition(123.12,3));
+		assertEquals(2, SolutionMain.getDigitByPosition(123.12,5));
 	}
 
 	@Test
 	public void testCalcTablePairs() {
 		assertArrayEquals(new int[][] {{8,8}, {4, 4}, {20,20}}, SolutionMain.calcTablePairs(8420, 4).toArray());
-		assertArrayEquals(new int[][] {{7,4}, {38, 36}, {24,24}, {5, 4}, {19, 16}}, SolutionMain.calcTablePairs(78459, 4).toArray());
 		assertArrayEquals(new int[][] {{126,111}, {150, 148}, {225,222}, {37,37}}, SolutionMain.calcTablePairs(1260257, 37).toArray());
+		assertArrayEquals(new int[][] {{7,4}, {38, 36}, {24,24}, {5, 4}, {19, 16}, {30, 28},{20, 20}}, SolutionMain.calcTablePairs(78459, 4).toArray());
 	}
 	
 	@Test
 	public void testoutputStringsFactory() {
-		ArrayList<String> testedOutputStrings = SolutionMain.outputStringsFactory(1234, 11);
+		ArrayList<String> testedOutputStrings = SolutionMain.outputStringsFactory(225, 15);
 		ArrayList<String> expectedOutputStrings = new ArrayList<>();
-		expectedOutputStrings.add(" 1234|11");
-		expectedOutputStrings.add("     |---");
-		expectedOutputStrings.add("-11  |112");
+		expectedOutputStrings.add(" 225|15");
+		expectedOutputStrings.add("    |--");
+		expectedOutputStrings.add("-15 |15");
 		expectedOutputStrings.add(" --");
-		expectedOutputStrings.add("  13");
-		expectedOutputStrings.add(" -11");
+		expectedOutputStrings.add("  75");
+		expectedOutputStrings.add(" -75");
 		expectedOutputStrings.add("  --");
-		expectedOutputStrings.add("   24");
-		expectedOutputStrings.add("  -22");
-		expectedOutputStrings.add("   --");
-		expectedOutputStrings.add("    2");
+		expectedOutputStrings.add("   0");
 		assertArrayEquals(expectedOutputStrings.toArray(), testedOutputStrings.toArray());
 		expectedOutputStrings.clear();
 		
 		testedOutputStrings = SolutionMain.outputStringsFactory(78459, 4);
 		expectedOutputStrings.add(" 78459|4");
-		expectedOutputStrings.add("      |-----");
-		expectedOutputStrings.add("-4    |19614");
+		expectedOutputStrings.add("      |--------");
+		expectedOutputStrings.add("-4    |19614.75");
 		expectedOutputStrings.add(" -");
 		expectedOutputStrings.add(" 38");
 		expectedOutputStrings.add("-36");
@@ -74,8 +75,15 @@ public class SolutionMainTest {
 		expectedOutputStrings.add("    19");
 		expectedOutputStrings.add("   -16");
 		expectedOutputStrings.add("    --");
-		expectedOutputStrings.add("     3");
+		expectedOutputStrings.add("     30");
+		expectedOutputStrings.add("    -28");
+		expectedOutputStrings.add("     --");
+		expectedOutputStrings.add("      20");
+		expectedOutputStrings.add("     -20");
+		expectedOutputStrings.add("      --");
+		expectedOutputStrings.add("       0");
 		assertArrayEquals(expectedOutputStrings.toArray(), testedOutputStrings.toArray());
 		expectedOutputStrings.clear();
+				
 	} 
 }

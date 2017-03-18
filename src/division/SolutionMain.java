@@ -3,6 +3,9 @@ package division;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 public class SolutionMain {
@@ -32,11 +35,12 @@ public class SolutionMain {
 		for(String string : printedOutputStrings) {
 			System.out.println(string);
 		}
-	}	
+	}
+		
 	public static ArrayList<String> outputStringsFactory(int divided, int divisor) {
 		ArrayList<String> result = new ArrayList<>();
 		ArrayList<int[]> tablePairs = calcTablePairs(divided, divisor);
-		int quotient = divided / divisor;
+		double quotient = (double) divided / divisor;
 		int spaces = 1;
 		
 		// drawing head
@@ -47,7 +51,8 @@ public class SolutionMain {
 				
 				result.add("-" + tablePairs.get(0)[1] + 
 						fillStringWithCharacter((digitCounter(divided)-
-								digitCounter(tablePairs.get(0)[1])),' ')+"|"+ quotient);
+								digitCounter(tablePairs.get(0)[1])),' ')+"|"+ 
+								BigDecimal.valueOf(quotient).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros().toPlainString());
 				
 				result.add(" " + fillStringWithCharacter(digitCounter(tablePairs.get(0)[1]),'-'));
 				
@@ -78,10 +83,11 @@ public class SolutionMain {
 	public static ArrayList<int[]> calcTablePairs(int divided, int divisor)
 	{
 		ArrayList<int[]> result = new ArrayList<>();
-		int quotient = divided / divisor;
+		Double quotient = (double) divided / divisor;
 		int positionInDivided = 0;
 		int positionInQuotient = 0;
 		int reminder = 0;
+		int numberDown = 0;
 						
 		while(positionInQuotient < digitCounter(quotient)){
 			int[] currentPair = new int[2];
@@ -90,14 +96,19 @@ public class SolutionMain {
 				reminder = result.get(result.size()-1)[0] - result.get(result.size()-1)[1];
 			}
 			
-			int numberDown = Integer.parseInt(String.valueOf(reminder) + getDigitByPosition(divided, positionInDivided++));
+			if(positionInDivided < digitCounter(divided)){
+				numberDown = Integer.parseInt(String.valueOf(reminder) + getDigitByPosition(divided, positionInDivided++));
+			} else {
+				numberDown = Integer.parseInt(String.valueOf(reminder) + "0");
+			}
+			
 			while(numberDown < divisor && numberDown > 0){
 				numberDown = Integer.parseInt(String.valueOf(numberDown)
 							+ String.valueOf(getDigitByPosition(divided, positionInDivided++)));
 			}
 			
 			int nextQuotinentDigit = getDigitByPosition(quotient, positionInQuotient++);
-			while(nextQuotinentDigit == 0 && positionInQuotient < digitCounter(quotient)){
+			while(nextQuotinentDigit <= 0 && positionInQuotient < digitCounter(quotient)){
 				nextQuotinentDigit = getDigitByPosition(quotient, positionInQuotient++);
 			} 
 								
@@ -109,12 +120,19 @@ public class SolutionMain {
 		return result;
 	}
 	
-	public static int getDigitByPosition(int number, int position) 
+	public static int getDigitByPosition(double doubleNumber, int position) 
 	{
-		int tmp = Math.abs(number);
-		String string =  Integer.valueOf(tmp).toString();
+		String string =  BigDecimal.valueOf(doubleNumber).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros().toPlainString();
+		char currentChar = string.charAt(position);
+		int result;
 		
-		return Integer.parseInt(String.valueOf(string.charAt(position)));
+		if(currentChar == '.') {
+			result = -1;
+		} else {
+			result = Integer.parseInt(String.valueOf(currentChar));
+		}
+		
+		return result;
 	}
 	
 	public static String fillStringWithCharacter(int numberOfCharacters, char character) 
@@ -127,15 +145,22 @@ public class SolutionMain {
 	    }
 	    return sb.toString();
 	}
-	
-	public static int digitCounter(int integerNumber) 
+		
+	public static int digitCounter(double doubleNumber) 
 	{
 		int counter = 0;
-
+		BigDecimal tmp = BigDecimal.valueOf(doubleNumber).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros();
+		int integerPart = tmp.intValue();
+		BigDecimal fractionalPart = tmp.subtract(BigDecimal.valueOf(integerPart));
+		
+		if(fractionalPart.compareTo(BigDecimal.valueOf(0)) != 0) {
+			counter = fractionalPart.toPlainString().length() - 1;
+		}
+		
 		do {
-			integerNumber /= 10;
+			integerPart /= 10;
 			counter++;
-		} while (integerNumber != 0);
+		} while (integerPart != 0);
 		
 		return counter;
 	}
