@@ -21,7 +21,7 @@ public class SolutionMain {
 			divisor = Math.abs(Integer.parseInt(reader.readLine()));
 			
 			if (divisor == 0) throw new NumberFormatException("divisor shouldn't be zero!");
-			if (divisor >= divided) throw new NumberFormatException("divisor should be less than divided!");
+			
 		} catch (NumberFormatException ex) {
 			System.out.println("Wrong number format : " + ex.getMessage());
 			return;		// The end...
@@ -41,20 +41,70 @@ public class SolutionMain {
 		ArrayList<String> result = new ArrayList<>();
 		ArrayList<int[]> tablePairs = calcTablePairs(divided, divisor);
 		double quotient = (double) divided / divisor;
-		int spaces = 1;
+		int spaces;
+		String quotientStringRepresentation;
+		int digitsInQuot;
+		
+		BigDecimal tmp = BigDecimal.valueOf(quotient).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros();
+		int integerPart = tmp.intValue();
+		BigDecimal fractionalPart = tmp.subtract(BigDecimal.valueOf(integerPart));
+		
+		if(fractionalPart.compareTo(BigDecimal.valueOf(0)) == 0) {	// has no fractional part
+			quotientStringRepresentation = tmp.toPlainString();		
+			digitsInQuot = quotientStringRepresentation.length();
+		} else {													// has fractional part 
+			String fractPartStr = fractionalPart.toPlainString();	// building string of digits in fractional part
+				
+			
+			int circleCounter = 1;													// trying to find period
+			int position = 1;
+			boolean hasPeriod = false;
+			String period = "";
+			
+			
+			while (!hasPeriod && position < (fractPartStr.length() - 3)){
+				position++;
+				period = fractPartStr.substring(position, position + 1);
+				circleCounter = fractPartStr.indexOf(period, position + 1);
+				if(circleCounter != -1) {											// we got it
+					hasPeriod = true;
+				}							
+			}
+			
+			if(hasPeriod) {
+				quotientStringRepresentation = integerPart + fractPartStr.substring(1, position) 
+						 + "(" + fractPartStr.substring(position, circleCounter) + ")";
+				digitsInQuot = quotientStringRepresentation.length() - 3;
+			} else {
+				quotientStringRepresentation = integerPart + fractPartStr.substring(1);
+				digitsInQuot = quotientStringRepresentation.length() - 1;
+			}
+		}
 		
 		// drawing head
+		
+				
+			
 				result.add(" " + divided + "|" + divisor);	
 				
 				result.add(fillStringWithCharacter((digitCounter(divided)+1),' ')+"|"+
-								fillStringWithCharacter((digitCounter(quotient)),'-'));
+								fillStringWithCharacter(Math.max(quotientStringRepresentation.length(), digitCounter(divisor)),'-'));
 				
-				result.add("-" + tablePairs.get(0)[1] + 
+				spaces = digitCounter(tablePairs.get(0)[0]) - digitCounter(tablePairs.get(0)[1]);
+				
+				
+				result.add(fillStringWithCharacter(spaces, ' ') + "-" + tablePairs.get(0)[1] + 
 						fillStringWithCharacter((digitCounter(divided)-
-								digitCounter(tablePairs.get(0)[1])),' ')+"|"+ 
-								BigDecimal.valueOf(quotient).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros().toPlainString());
+								digitCounter(tablePairs.get(0)[1])) - spaces,' ')+"|"+ quotientStringRepresentation);
 				
-				result.add(" " + fillStringWithCharacter(digitCounter(tablePairs.get(0)[1]),'-'));
+				
+				spaces++;
+				
+				
+				result.add(fillStringWithCharacter(1, ' ')
+						+ fillStringWithCharacter(digitCounter(tablePairs.get(0)[0]),'-'));
+				
+				
 				
 				// drawing table
 				for(int i = 1; i < tablePairs.size(); i++){ 	
@@ -65,9 +115,10 @@ public class SolutionMain {
 					}
 								
 					result.add(fillStringWithCharacter(spaces, ' ') + tablePairs.get(i)[0]);
+					spaces += digitCounter(tablePairs.get(i)[0]) - digitCounter(tablePairs.get(i)[1]);
 					result.add(fillStringWithCharacter(spaces-1 , ' ') + "-" + tablePairs.get(i)[1]);
 					result.add(fillStringWithCharacter(spaces, ' ') + 
-							fillStringWithCharacter(digitCounter(tablePairs.get(i)[1]), '-'));
+							fillStringWithCharacter(digitCounter(tablePairs.get(i)[0]), '-'));
 				}
 				
 				// final reminder printing

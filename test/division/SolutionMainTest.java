@@ -41,6 +41,8 @@ public class SolutionMainTest {
 		assertArrayEquals(new int[][] {{8,8}, {4, 4}, {20,20}}, SolutionMain.calcTablePairs(8420, 4).toArray());
 		assertArrayEquals(new int[][] {{126,111}, {150, 148}, {225,222}, {37,37}}, SolutionMain.calcTablePairs(1260257, 37).toArray());
 		assertArrayEquals(new int[][] {{7,4}, {38, 36}, {24,24}, {5, 4}, {19, 16}, {30, 28},{20, 20}}, SolutionMain.calcTablePairs(78459, 4).toArray());
+		assertArrayEquals(new int[][] {{10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, {10,9}, 
+										{10,9}, {10,9}},SolutionMain.calcTablePairs(1000, 3).toArray());
 	}
 	
 	@Test
@@ -82,6 +84,24 @@ public class SolutionMainTest {
 		expectedOutputStrings.add("     -20");
 		expectedOutputStrings.add("      --");
 		expectedOutputStrings.add("       0");
+		assertArrayEquals(expectedOutputStrings.toArray(), testedOutputStrings.toArray());
+		expectedOutputStrings.clear();
+		
+		testedOutputStrings = SolutionMain.outputStringsFactory(1000, 3);
+		expectedOutputStrings.add(" 1000|3");
+		expectedOutputStrings.add("     |-------");
+		expectedOutputStrings.add(" -9  |333.(3)");
+		expectedOutputStrings.add(" --");
+		expectedOutputStrings.add("  10");
+		expectedOutputStrings.add("  -9");
+		expectedOutputStrings.add("  --");
+		expectedOutputStrings.add("   10");
+		expectedOutputStrings.add("   -9");
+		expectedOutputStrings.add("   --");
+		expectedOutputStrings.add("    10");
+		expectedOutputStrings.add("    -9");
+		expectedOutputStrings.add("    --");
+		expectedOutputStrings.add("     1");
 		assertArrayEquals(expectedOutputStrings.toArray(), testedOutputStrings.toArray());
 		expectedOutputStrings.clear();
 				
