@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SolutionMain {
 
@@ -41,53 +44,57 @@ public class SolutionMain {
 		ArrayList<String> result = new ArrayList<>();
 		ArrayList<int[]> tablePairs = calcTablePairs(divided, divisor);
 		double quotient = (double) divided / divisor;
+		List<Object> splitted = splitDouble(quotient);
+		
+		Integer integerPart = (Integer) splitted.get(0);
+		String fractionalPart = (String) splitted.get(1);
 		int spaces;
 		String quotientStringRepresentation;
 		int digitsInQuot;
-		
-		BigDecimal tmp = BigDecimal.valueOf(quotient).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros();
-		int integerPart = tmp.intValue();
-		BigDecimal fractionalPart = tmp.subtract(BigDecimal.valueOf(integerPart));
-		
-		if(fractionalPart.compareTo(BigDecimal.valueOf(0)) == 0) {	// has no fractional part
-			quotientStringRepresentation = tmp.toPlainString();		
+						
+		if(fractionalPart.equals("0")) {	// has no fractional part
+			quotientStringRepresentation = integerPart.toString();		
 			digitsInQuot = quotientStringRepresentation.length();
 		} else {													// has fractional part 
-			String fractPartStr = fractionalPart.toPlainString();	// building string of digits in fractional part
-				
+			// building string of digits in fractional part
 			
 			int circleCounter = 1;													// trying to find period
 			int position = 1;
 			boolean hasPeriod = false;
 			String period = "";
-			
-			
-			while (!hasPeriod && position < (fractPartStr.length() - 3)){
+						
+			while (!hasPeriod && position < (fractionalPart.length() - 3)){
 				position++;
-				period = fractPartStr.substring(position, position + 1);
-				circleCounter = fractPartStr.indexOf(period, position + 1);
+				period = fractionalPart.substring(position, position + 1);
+				circleCounter = fractionalPart.indexOf(period, position + 1);
 				if(circleCounter != -1) {											// we got it
 					hasPeriod = true;
 				}							
 			}
 			
 			if(hasPeriod) {
-				quotientStringRepresentation = integerPart + fractPartStr.substring(1, position) 
-						 + "(" + fractPartStr.substring(position, circleCounter) + ")";
+				quotientStringRepresentation = integerPart + fractionalPart.substring(1, position) 
+						 + "(" + fractionalPart.substring(position, circleCounter) + ")";
 				digitsInQuot = quotientStringRepresentation.length() - 3;
 			} else {
-				quotientStringRepresentation = integerPart + fractPartStr.substring(1);
+				quotientStringRepresentation = integerPart + fractionalPart.substring(1);
 				digitsInQuot = quotientStringRepresentation.length() - 1;
 			}
 		}
 		
 		// drawing head
 		
+				int spacesAfterDivided;
 				
-			
-				result.add(" " + divided + "|" + divisor);	
+				if(digitCounter(divided) >= digitCounter(tablePairs.get(0)[1])) {
+					spacesAfterDivided = 0;
+				} else {
+					spacesAfterDivided = digitCounter(tablePairs.get(0)[1]) - digitCounter(divided);
+				}
 				
-				result.add(fillStringWithCharacter((digitCounter(divided)+1),' ')+"|"+
+				result.add(" " + divided + fillStringWithCharacter(spacesAfterDivided,' ')+ "|" + divisor);	
+				
+				result.add(fillStringWithCharacter(digitCounter(divided) + spacesAfterDivided + 1,' ')+"|"+
 								fillStringWithCharacter(Math.max(quotientStringRepresentation.length(), digitCounter(divisor)),'-'));
 				
 				spaces = digitCounter(tablePairs.get(0)[0]) - digitCounter(tablePairs.get(0)[1]);
@@ -96,18 +103,14 @@ public class SolutionMain {
 				result.add(fillStringWithCharacter(spaces, ' ') + "-" + tablePairs.get(0)[1] + 
 						fillStringWithCharacter((digitCounter(divided)-
 								digitCounter(tablePairs.get(0)[1])) - spaces,' ')+"|"+ quotientStringRepresentation);
-				
-				
+					
 				spaces++;
-				
-				
+							
 				result.add(fillStringWithCharacter(1, ' ')
 						+ fillStringWithCharacter(digitCounter(tablePairs.get(0)[0]),'-'));
-				
-				
-				
+							
 				// drawing table
-				for(int i = 1; i < tablePairs.size(); i++){ 	
+				for(int i = 1; i < digitsInQuot; i++){ 	
 					spaces += digitCounter(tablePairs.get(i-1)[1]) - digitCounter(tablePairs.get(i-1)[0] - tablePairs.get(i-1)[1]);
 					
 					if(tablePairs.get(i-1)[0] - tablePairs.get(i-1)[1] == 0){	// special case
@@ -115,8 +118,8 @@ public class SolutionMain {
 					}
 								
 					result.add(fillStringWithCharacter(spaces, ' ') + tablePairs.get(i)[0]);
+					result.add(fillStringWithCharacter(spaces-1, ' ') + "-" + tablePairs.get(i)[1]);
 					spaces += digitCounter(tablePairs.get(i)[0]) - digitCounter(tablePairs.get(i)[1]);
-					result.add(fillStringWithCharacter(spaces-1 , ' ') + "-" + tablePairs.get(i)[1]);
 					result.add(fillStringWithCharacter(spaces, ' ') + 
 							fillStringWithCharacter(digitCounter(tablePairs.get(i)[0]), '-'));
 				}
@@ -144,27 +147,32 @@ public class SolutionMain {
 			int[] currentPair = new int[2];
 			
 			if(result.size() > 0 ){
-				reminder = result.get(result.size()-1)[0] - result.get(result.size()-1)[1];
+				reminder = result.get(result.size()-1)[0] - result.get(result.size()-1)[1];	// calculating last pair reminder
 			}
 			
-			if(positionInDivided < digitCounter(divided)){
+			if(positionInDivided < digitCounter(divided)){		// taking down digit from divided or 0 if out of bounds
 				numberDown = Integer.parseInt(String.valueOf(reminder) + getDigitByPosition(divided, positionInDivided++));
 			} else {
 				numberDown = Integer.parseInt(String.valueOf(reminder) + "0");
 			}
 			
-			while(numberDown < divisor && numberDown > 0){
-				numberDown = Integer.parseInt(String.valueOf(numberDown)
+			while(numberDown < divisor) {		// taking down next digit until numberDown > divisor
+				if (positionInDivided < digitCounter(divided)){
+					numberDown = Integer.parseInt(String.valueOf(numberDown)
 							+ String.valueOf(getDigitByPosition(divided, positionInDivided++)));
+				} else {
+					numberDown = Integer.parseInt(String.valueOf(numberDown) + "0");
+				}
 			}
 			
-			int nextQuotinentDigit = getDigitByPosition(quotient, positionInQuotient++);
-			while(nextQuotinentDigit <= 0 && positionInQuotient < digitCounter(quotient)){
-				nextQuotinentDigit = getDigitByPosition(quotient, positionInQuotient++);
+			int nextQuotientDigit = getDigitByPosition(quotient, positionInQuotient++);
+			// taking next digit from quotient
+			while(nextQuotientDigit <= 0 && positionInQuotient < digitCounter(quotient)){
+				nextQuotientDigit = getDigitByPosition(quotient, positionInQuotient++);
 			} 
 								
 			currentPair[0] = numberDown;
-			currentPair[1] = nextQuotinentDigit * divisor;
+			currentPair[1] = nextQuotientDigit * divisor;
 							
 			result.add(currentPair);
 		}
@@ -173,12 +181,13 @@ public class SolutionMain {
 	
 	public static int getDigitByPosition(double doubleNumber, int position) 
 	{
+		// formatting number according our requirements and converting to string
 		String string =  BigDecimal.valueOf(doubleNumber).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros().toPlainString();
 		char currentChar = string.charAt(position);
 		int result;
 		
 		if(currentChar == '.') {
-			result = -1;
+			result = -1;			// return -1 if its dot 
 		} else {
 			result = Integer.parseInt(String.valueOf(currentChar));
 		}
@@ -200,14 +209,16 @@ public class SolutionMain {
 	public static int digitCounter(double doubleNumber) 
 	{
 		int counter = 0;
-		BigDecimal tmp = BigDecimal.valueOf(doubleNumber).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros();
-		int integerPart = tmp.intValue();
-		BigDecimal fractionalPart = tmp.subtract(BigDecimal.valueOf(integerPart));
+		List<Object> splitted = splitDouble(doubleNumber);
 		
-		if(fractionalPart.compareTo(BigDecimal.valueOf(0)) != 0) {
-			counter = fractionalPart.toPlainString().length() - 1;
-		}
+		Integer integerPart = (Integer) splitted.get(0);
+		String fractionalPart = (String) splitted.get(1);
+				
+		// counting digits in fractional part
+		counter = fractionalPart.length() - 1;
 		
+		
+		// counting digits in integer part
 		do {
 			integerPart /= 10;
 			counter++;
@@ -215,4 +226,20 @@ public class SolutionMain {
 		
 		return counter;
 	}
+
+	public static List<Object> splitDouble(double doubleNumber) {
+				
+		// formatting number according our requirements
+		BigDecimal tmp = BigDecimal.valueOf(doubleNumber).setScale(10, BigDecimal.ROUND_DOWN).stripTrailingZeros();
+		
+		// split into integer and fractional parts
+		Integer integerPart = tmp.intValue();
+		String fractPartStr = tmp.subtract(BigDecimal.valueOf(integerPart)).toPlainString();
+				
+		// building result
+		List<Object> result = new ArrayList<>();
+		result.add(integerPart);
+		result.add(fractPartStr);
+		return result;
+		}	
 }

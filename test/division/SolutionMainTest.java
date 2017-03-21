@@ -93,17 +93,29 @@ public class SolutionMainTest {
 		expectedOutputStrings.add(" -9  |333.(3)");
 		expectedOutputStrings.add(" --");
 		expectedOutputStrings.add("  10");
-		expectedOutputStrings.add("  -9");
-		expectedOutputStrings.add("  --");
-		expectedOutputStrings.add("   10");
-		expectedOutputStrings.add("   -9");
+		expectedOutputStrings.add(" -9");
 		expectedOutputStrings.add("   --");
-		expectedOutputStrings.add("    10");
-		expectedOutputStrings.add("    -9");
+		expectedOutputStrings.add("   10");
+		expectedOutputStrings.add("  -9");
 		expectedOutputStrings.add("    --");
+		expectedOutputStrings.add("    10");
+		expectedOutputStrings.add("   -9");
+		expectedOutputStrings.add("     --");
 		expectedOutputStrings.add("     1");
 		assertArrayEquals(expectedOutputStrings.toArray(), testedOutputStrings.toArray());
 		expectedOutputStrings.clear();
-				
-	} 
+			
+	}
+	
+	@Test
+	public void testSplitDouble() {
+		assertEquals(3, 	 SolutionMain.splitDouble((double) 3.14).get(0));
+		assertEquals("0.14", SolutionMain.splitDouble((double) 3.14).get(1));
+		
+		assertEquals(0, 	 SolutionMain.splitDouble((double) 0.040).get(0));
+		assertEquals("0.04", SolutionMain.splitDouble((double) 0.040).get(1));
+		
+		assertEquals(10, 	 SolutionMain.splitDouble((double) 10).get(0));
+		assertEquals("0",    SolutionMain.splitDouble((double) 10).get(1));
+	}
 }
